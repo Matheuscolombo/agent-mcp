@@ -2,6 +2,7 @@ import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
 import { supabase, phoneVariants } from "../supabase.js";
 import { checkRate } from "../ratelimit.js";
+import { logAction } from "../audit.js";
 import { jsonContent, errorContent, clampLimit } from "./helpers.js";
 
 /** Resolve unified_customer ids por email/telefone (links + colunas primárias). */
@@ -136,6 +137,38 @@ export function registerCustomerTools(server: McpServer) {
           text: typeof m.body === "string" ? m.body.slice(0, 500) : m.body,
         })),
       });
+    },
+  );
+
+  server.registerTool(
+    "update_lead",
+    {
+      title: "Atualizar dados do lead",
+      description:
+        "Salva nome e/ou email no cadastro do lead (identificado pelo telefone). " +
+        "Use quando o cliente informar esses dados durante a conversa.",
+      inputSchema: {
+        phone: z.string().describe("Telefone do lead"),
+        name: z.string().optional(),
+        email: z.string().email().optional(),
+      },
+    },
+    async ({ phone, name, email }) => {
+      checkRate("write");
+      if (!name && !email) return errorContent("Informe name e/ou email.");
+      const variants = phoneVariants(phone);
+      const patch: Record<string, string> = {};
+      if (name) patch.name = name.trim();
+      if (email) patch.email = email.toLowerCase().trim();
+      const { data, error } = await supabase
+        .from("leads")
+        .update(patch)
+        .in("phone", variants)
+        .select("id, name, email, phone");
+      await logAction("update_lead", { phone, ...patch }, error ? { error: error.message } : { updated: data?.length ?? 0 }, !error);
+      if (error) return errorContent(error.message);
+      if (!data?.length) return errorContent(`Nenhum lead encontrado com o telefone ${phone}.`);
+      return jsonContent({ updated: data });
     },
   );
 
