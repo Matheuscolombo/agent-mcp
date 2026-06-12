@@ -59,6 +59,9 @@ const result = query({
 | `setup_funnel_product` | **write** | Produto + raw names no funil; acusa colisões |
 | `link_automation` | **write** | Vincula flow a funil (idempotente) |
 | `onboard_product` | **write** | Orquestrador: produto → clone → vínculo |
+| `cademi_get_user` | read | Aluno na área de membros (por email/ID) — requer CADEMI_* no .env |
+| `cademi_list_products` | read | Produtos/cursos da Cademi (IDs para entrega) |
+| `cademi_grant_access` | **write** | Libera/REENVIA acesso (Cademi manda email) — `confirm:true` obrigatório |
 
 ## Segurança
 
@@ -87,8 +90,14 @@ cp .env.example .env && nano .env && chmod 600 .env
 
 O processo é spawnado via stdio pelo orquestrador do agente (não fica escutando porta).
 
+## Cademi
+
+API v1 (https://api-docs.cademi.com.br/): Bearer `CADEMI_API_KEY`, base `CADEMI_DOMAIN/api/v1`.
+A v1 **não tem reset de senha** — o fluxo de suporte é `cademi_grant_access` (entrega/enviar),
+que faz a Cademi reenviar o email de acesso ao aluno. Sem `CADEMI_DOMAIN`/`CADEMI_API_KEY` no
+`.env`, as tools nem são registradas.
+
 ## Fase 2 (pendente)
 
-- `cademi_*` (reset de senha, consulta/concessão de acesso) — aguardando doc da API Cademi.
 - `send_whatsapp_message` — atrás de flag, via edge function `whatsapp-send` (guards de
   instância/atribuição), `confirm: true` obrigatório.
