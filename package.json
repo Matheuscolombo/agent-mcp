@@ -1,0 +1,24 @@
+{
+  "name": "agent-mcp",
+  "version": "1.0.0",
+  "description": "MCP server do metric-streamer — tools de cliente, funis e automações para agentes de IA",
+  "type": "module",
+  "main": "dist/index.js",
+  "bin": { "agent-mcp": "dist/index.js" },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts",
+    "start": "node dist/index.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.0",
+    "@supabase/supabase-js": "^2.49.0",
+    "dotenv": "^16.4.5",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}
