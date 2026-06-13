@@ -1,0 +1,18 @@
+[Unit]
+Description=Girassol - agente de suporte WhatsApp (Claude Agent SDK + MCP metric-streamer)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=agent
+WorkingDirectory=/opt/girassol
+EnvironmentFile=/opt/girassol/.env
+ExecStart=/usr/bin/node /opt/girassol/dist/index.js
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target

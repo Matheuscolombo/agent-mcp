@@ -5,13 +5,18 @@ const url = process.env.SUPABASE_URL;
 const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
 if (!url || !key) {
-  console.error("[agent-mcp] SUPABASE_URL e SUPABASE_SERVICE_ROLE_KEY são obrigatórios (.env)");
-  process.exit(1);
+  // Não derruba o servidor: tools Cademi seguem funcionando; as de Supabase
+  // retornam erro descritivo por chamada até a service key entrar no .env.
+  console.error(
+    "[agent-mcp] AVISO: SUPABASE_URL/SUPABASE_SERVICE_ROLE_KEY ausentes — tools de banco indisponíveis",
+  );
 }
 
-export const supabase = createClient(url, key, {
-  auth: { persistSession: false, autoRefreshToken: false },
-});
+export const supabase = createClient(
+  url || "https://pendente.supabase.co",
+  key || "pendente-configurar-service-key",
+  { auth: { persistSession: false, autoRefreshToken: false } },
+);
 
 export const ORG_ID = "00000000-0000-0000-0000-000000000001";
 export const ACTOR = process.env.AGENT_ACTOR || "support-agent";
