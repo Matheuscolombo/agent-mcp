@@ -32,7 +32,19 @@ export const CONFIG = {
   pauseHours: Number(process.env.GIRASSOL_PAUSE_HOURS || 6),
   teamPhone: process.env.GIRASSOL_TEAM_PHONE || "",
   stateFile: process.env.GIRASSOL_STATE_FILE || resolve(process.cwd(), "girassol-state.json"),
+  // Whitelist: se preenchida, a Girassol SÓ atende esses números (resto é ignorado).
+  // Comparação pelos últimos 8 dígitos — robusta ao 9º dígito dos celulares BR.
+  whitelist: (process.env.GIRASSOL_WHITELIST || "")
+    .split(",")
+    .map((s) => s.replace(/\D/g, "").slice(-8))
+    .filter(Boolean),
 };
+
+/** Telefone está liberado? (whitelist vazia = libera todos) */
+export function isWhitelisted(phone: string): boolean {
+  if (CONFIG.whitelist.length === 0) return true;
+  return CONFIG.whitelist.includes(phone.replace(/\D/g, "").slice(-8));
+}
 
 export function loadSystemPrompt(): string {
   try {

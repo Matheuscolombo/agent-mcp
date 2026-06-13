@@ -1,5 +1,5 @@
 import Fastify from "fastify";
-import { CONFIG } from "./config.js";
+import { CONFIG, isWhitelisted } from "./config.js";
 import { parseWebhook, sendBlocks, wasSentByBot } from "./uazapi.js";
 import { isPaused, pauseBot } from "./state.js";
 import { runGirassol } from "./agent.js";
@@ -58,6 +58,7 @@ app.post("/webhook/uazapi", async (req, reply) => {
   const msg = parseWebhook(req.body);
   if (!msg) return { ignored: "payload sem mensagem" };
   if (msg.isGroup) return { ignored: "grupo" };
+  if (!isWhitelisted(msg.phone)) return { ignored: "fora da whitelist" };
 
   if (msg.fromMe) {
     // Eco da própria instância: se NÃO foi o bot, é um humano atendendo → pausa.
