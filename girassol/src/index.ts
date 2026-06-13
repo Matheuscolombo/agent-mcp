@@ -48,7 +48,9 @@ async function flush(phone: string) {
 app.get("/health", async () => ({ ok: true, dryRun: CONFIG.dryRun, model: CONFIG.model }));
 
 app.post("/webhook/uazapi", async (req, reply) => {
-  const secret = req.headers["x-girassol-secret"];
+  // secret no header OU na query string (?secret=) — painéis de webhook nem sempre
+  // permitem headers customizados
+  const secret = req.headers["x-girassol-secret"] || (req.query as any)?.secret;
   if (secret !== CONFIG.webhookSecret) {
     return reply.code(401).send({ error: "unauthorized" });
   }
