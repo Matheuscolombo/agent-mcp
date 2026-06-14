@@ -3,6 +3,7 @@ import { z } from "zod";
 import { CONFIG, loadSystemPrompt } from "./config.js";
 import { getSession, setSession, clearSession, pauseBot } from "./state.js";
 import { notifyTeam } from "./uazapi.js";
+import { createSupportTicket } from "./crm.js";
 
 const SYSTEM_PROMPT = loadSystemPrompt();
 
@@ -20,6 +21,10 @@ function makeTransferencia(phone: string) {
     },
     async ({ nome, email, motivo }) => {
       pauseBot(phone);
+      // Abre o ticket no board "Suporte — Atendimento Humano" (best-effort)
+      await createSupportTicket(phone, nome, email, motivo).catch((e) =>
+        console.error("[girassol] erro ao abrir ticket de suporte:", (e as Error)?.message || e),
+      );
       await notifyTeam(
         `🌻 *Girassol — transferência*\n\nCliente: ${nome || "?"} (${phone})\nEmail: ${email || "?"}\n\nMotivo: ${motivo}`,
       );

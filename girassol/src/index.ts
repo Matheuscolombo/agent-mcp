@@ -3,6 +3,7 @@ import { CONFIG, isWhitelisted } from "./config.js";
 import { parseWebhook, sendBlocks, wasSentByBot } from "./uazapi.js";
 import { isPaused, pauseBot } from "./state.js";
 import { runGirassol } from "./agent.js";
+import { startPoller } from "./poller.js";
 
 const app = Fastify({ logger: true });
 
@@ -83,7 +84,11 @@ app.post("/webhook/uazapi", async (req, reply) => {
 
 app
   .listen({ port: CONFIG.port, host: "0.0.0.0" })
-  .then(() => console.log(`[girassol] ouvindo na porta ${CONFIG.port} (dryRun=${CONFIG.dryRun}, model=${CONFIG.model})`))
+  .then(() => {
+    console.log(`[girassol] ouvindo na porta ${CONFIG.port} (dryRun=${CONFIG.dryRun}, model=${CONFIG.model})`);
+    // Caminho ativo: o servidor consulta o CRM (o repasse do edge não chega aqui).
+    startPoller(enqueue, (m) => app.log.info(m));
+  })
   .catch((err) => {
     console.error(err);
     process.exit(1);
