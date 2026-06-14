@@ -38,6 +38,14 @@ export const CONFIG = {
     .split(",")
     .map((s) => s.replace(/\D/g, "").slice(-8))
     .filter(Boolean),
+  // Supabase — o poller consulta a tabela whatsapp_messages do CRM direto
+  // (substitui o repasse do edge, que não alcança o servidor de forma confiável).
+  supabaseUrl: (process.env.SUPABASE_URL || "").replace(/\/+$/, ""),
+  supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || "",
+  pollMs: Number(process.env.GIRASSOL_POLL_MS || 4000),
+  // Board "Suporte — Atendimento Humano" (kanban de tickets das transferências)
+  supportFunnelId: process.env.GIRASSOL_SUPPORT_FUNNEL_ID || "3e786611-b27a-4e3a-8063-6579d38dd31a",
+  supportStageWaiting: process.env.GIRASSOL_SUPPORT_STAGE || "fb745b97-5cf4-4a2b-aa3d-6ceb4499e6b4",
 };
 
 /** Telefone está liberado? (whitelist vazia = libera todos) */
